@@ -21,13 +21,53 @@ module.exports = {
 };
 
 
+function Branch(parentIndex, position, divergingText) {
+
+    // Construct
+    if (isDefined(parentIndex) && isDefined(position)) {
+
+        // Branch is a fork
+        var parentText = BRANCHES[parentIndex].text.slice(0, position);
+        this.text = parentText.concat(divergingText || []);
+        this.splitPosition = position;
+        this.parentIndex = parentIndex;
+
+    } else {
+        // Branch is a root
+        this.text = START_TEXT;
+    }
+    this.index = BRANCHES.push(this) - 1;
+
+    // Functions
+    this.append = function (newText, preLength) {
+
+        if (this.text.length === preLength) {
+
+            // No divergence necessary
+            this.text = this.text.concat(newText);
+
+        } else {
+
+            // Fork Branch
+            new Branch(this.index, preLength, newText);
+        }
+    };
+    this.snippet = function () {
+        return this.text.slice(-LINES_PER_POST);
+    };
+
+    return this;
+}
+
+
 /**
  * Clears all existing branches,
- * leaving one branch containing only the START_TEXT
+ * leaving one Branch containing only the START_TEXT
  * (Can be called without parameters)
  */
 function reset(req, res) {
-    BRANCHES = [START_TEXT];
+    BRANCHES = [];
+    new Branch();
     if (res) {
         res.status(204);
     }
@@ -43,13 +83,15 @@ function getAllBranches(req, res) {
 
 
 /**
- * Sends the last post from a random branch, along with the branch's index
+ * Sends the last post from a random Branch, along with the Branch's index
  */
 function getFromRandomBranch(req, res) {
 
     var branchIndex = randomBranchIndex();
-    var text = BRANCHES[branchIndex].slice(-LINES_PER_POST);
-    var position = BRANCHES[branchIndex].length;
+    console.log(BRANCHES);
+    console.log(branchIndex);
+    var text = BRANCHES[branchIndex].snippet();
+    var position = BRANCHES[branchIndex].text.length;
 
     res.json({
         text: text,
@@ -61,7 +103,7 @@ function getFromRandomBranch(req, res) {
 
 
 /**
- * Adds req.body.text to req.body.branch
+ * Adds req.body.text to req.body.Branch
  */
 function postToBranch(req, res) {
 
@@ -75,27 +117,16 @@ function postToBranch(req, res) {
         // TODO - allow deletion of bad items
     }
     else if (
-        position                     // Position supplied
+        isDefined(position)          // Position supplied
         && BRANCHES[branchIndex]     // Branch supplied and exists
         && textIsValid(text)) {      // Text supplied and is valid
 
-        if (BRANCHES[branchIndex].length === position) {
+        BRANCHES[branchIndex].append(text, position);
+        res.status(201); // Created
 
-            // No divergence necessary
-            BRANCHES[branchIndex] = BRANCHES[branchIndex].concat(text);
-            res.status(200); // OK
-
-        } else {
-
-            // Fork branch
-            var fork = BRANCHES[branchIndex].slice(0, position);
-            fork = fork.concat(text);
-            BRANCHES.push(fork);
-            res.status(201); // Created
-        }
     } else {
 
-        // Request was improperly formatted or branch was deleted
+        // Request was improperly formatted or Branch was deleted
         res.status(422); // Unprocessable Entity
     }
     return getFromRandomBranch(req, res);
@@ -112,8 +143,16 @@ function textIsValid(text) {
 
 
 /**
- * Returns the index of a random branch
+ * Returns the index of a random Branch
  */
 function randomBranchIndex() {
     return Math.floor(Math.random() * BRANCHES.length);
+}
+
+
+/**
+ * Returns whether obj has a non-null value
+ */
+function isDefined(obj) {
+    return typeof obj != 'undefined' && typeof obj != 'null';
 }
