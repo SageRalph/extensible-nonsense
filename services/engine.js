@@ -2,7 +2,7 @@ const START_TEXT = [
     'The story starts here',
     'By many authors, with much divergence',
     'From chaos comes narrative',
-    'Begin'
+    'It begins'
 ];
 
 
@@ -41,15 +41,17 @@ function Branch(parentIndex, position, divergingText) {
     // Functions
     this.append = function (newText, preLength) {
 
-        if (this.text.length === preLength) {
+        if (this.text.length == preLength) {
 
             // No divergence necessary
             this.text = this.text.concat(newText);
+            console.log('Continuing branch ' + this.index);
 
         } else {
 
             // Fork Branch
             new Branch(this.index, preLength, newText);
+            console.log('Diverging');
         }
     };
     this.snippet = function () {
@@ -65,11 +67,14 @@ function Branch(parentIndex, position, divergingText) {
  * leaving one Branch containing only the START_TEXT
  * (Can be called without parameters)
  */
-function reset(req, res) {
+function reset(req, res, next) {
     BRANCHES = [];
     new Branch();
     if (res) {
         res.status(204);
+    }
+    if (next) {
+        return next();
     }
 }
 
@@ -88,12 +93,10 @@ function getAllBranches(req, res) {
 function getFromRandomBranch(req, res) {
 
     var branchIndex = randomBranchIndex();
-    console.log(BRANCHES);
-    console.log(branchIndex);
     var text = BRANCHES[branchIndex].snippet();
     var position = BRANCHES[branchIndex].text.length;
 
-    res.json({
+    res.render('main', {
         text: text,
         branch: branchIndex,
         position: position,
@@ -107,12 +110,15 @@ function getFromRandomBranch(req, res) {
  */
 function postToBranch(req, res) {
 
+    console.log('Received:\n', req.body);
+
     var position = req.body.position;
     var branchIndex = req.body.branch;
     var text = req.body.text;
     var flagged = req.body.flagged;
 
     if (flagged) {
+        console.log('Branch entry flagged');
         res.status(501); // Not Implemented
         // TODO - allow deletion of bad items
     }
@@ -127,6 +133,7 @@ function postToBranch(req, res) {
     } else {
 
         // Request was improperly formatted or Branch was deleted
+        console.log('Bad request');
         res.status(422); // Unprocessable Entity
     }
     return getFromRandomBranch(req, res);

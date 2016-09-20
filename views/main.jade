@@ -1,0 +1,24 @@
+doctype html
+html(lang='en')
+    head
+        meta(charset='UTF-8')
+        link(href='/stylesheets/main.css', rel='stylesheet')
+        title Title
+    body
+        section
+            h1 Extensible-Nonsense
+            p
+                | Below are some lines from the story so far,
+                | continue the story below.
+            ul
+                each line in text
+                    li= line
+            form(name="postText", method="post")
+                div.input
+                    - for (var i=1; i<=desiredLines; i++) {
+                    input(type="text",name="text")
+                    - }
+                    input(type="hidden" name="position" value="#{position}")
+                    input(type="hidden" name="branch" value="#{branch}")
+                div.actions
+                    input(type="submit", value="Commit")
