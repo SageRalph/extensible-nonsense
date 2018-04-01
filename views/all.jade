@@ -1,0 +1,15 @@
+doctype html
+html(lang='en')
+    head
+        meta(charset='UTF-8')
+        link(href='/stylesheets/main.css', rel='stylesheet')
+        title Title
+    body
+        section
+            h1 Extensible-Nonsense
+            div.branchContainer
+                each branch in branches
+                    ul
+                        each line in branch.text
+                            li= line
+

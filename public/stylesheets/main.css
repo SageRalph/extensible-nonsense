@@ -4,10 +4,14 @@ body {
 }
 
 section {
-    max-width: 25em;
+    margin: auto;
     background-color: #ECECEA;
     padding: 1.5em;
     box-shadow: 0px 0px 5px 0px rgba(42, 42, 42, .75);
+}
+
+.card {
+    max-width: 25em;
 }
 
 input {
@@ -31,4 +35,8 @@ li {
 
 h1 {
     margin-top: 0;
+}
+
+.branchContainer {
+    display: flex;
 }

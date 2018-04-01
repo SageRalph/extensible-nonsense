@@ -83,7 +83,9 @@ function reset(req, res, next) {
  * Sends an array of all branches
  */
 function getAllBranches(req, res) {
-    res.json(BRANCHES);
+    res.render('all', {
+        branches: BRANCHES
+    });
 }
 
 
