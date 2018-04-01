@@ -1,6 +1,7 @@
 #build
 nbproject
 .idea
+.vscode
 
 # Logs
 logs

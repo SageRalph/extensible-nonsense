@@ -98,7 +98,7 @@ function getFromRandomBranch(req, res) {
     var text = BRANCHES[branchIndex].snippet();
     var position = BRANCHES[branchIndex].text.length;
 
-    res.render('main', {
+    res.render('editor', {
         text: text,
         branch: branchIndex,
         position: position,
